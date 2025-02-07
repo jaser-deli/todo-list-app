@@ -21,7 +21,7 @@ A simple and elegant todo list application built with Flask and modern web techn
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/openhands/todo-list-app.git
+git clone https://github.com/jaser-deli/todo-list-app.git
 cd todo-list-app
 ```
 
