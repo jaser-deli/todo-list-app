@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Todo List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            border-left: 5px solid;
+            transition: transform 0.2s;
+        }
+        .todo-item:hover {
+            transform: translateX(5px);
+        }
+        .todo-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+        }
+        .todo-text {
+            flex: 1;
+        }
+        .todo-date {
+            color: #666;
+            font-size: 0.9em;
+            min-width: 100px;
+        }
+        .delete-btn {
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        #todo-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #todo-input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #todo-date {
+            padding: 8px;
+            width: 150px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #todo-color {
+            padding: 0;
+            width: 50px;
+            height: 38px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todo List</h1>
+    <form id="todo-form">
+        <input type="text" id="todo-input" placeholder="Enter a new todo" required>
+        <input type="date" id="todo-date" required>
+        <input type="color" id="todo-color" value="#3498db" title="Choose a color for your todo">
+        <button type="submit">Add Todo</button>
+    </form>
+    <div id="todo-list"></div>
+
+    <script>
+        const todoForm = document.getElementById('todo-form');
+        const todoInput = document.getElementById('todo-input');
+        const todoDate = document.getElementById('todo-date');
+        const todoColor = document.getElementById('todo-color');
+        const todoList = document.getElementById('todo-list');
+
+        // Set default date to today
+        const today = new Date().toISOString().split('T')[0];
+        todoDate.value = today;
+
+        function loadTodos() {
+            fetch('/api/todos')
+                .then(response => response.json())
+                .then(todos => {
+                    todoList.innerHTML = '';
+                    todos.forEach((todo, index) => {
+                        const todoItem = document.createElement('div');
+                        todoItem.className = 'todo-item';
+                        todoItem.style.borderLeftColor = todo.color || '#3498db';
+                        todoItem.innerHTML = `
+                            <div class="todo-content">
+                                <span class="todo-text">${todo.text}</span>
+                                <span class="todo-date">${todo.date}</span>
+                            </div>
+                            <button class="delete-btn" onclick="deleteTodo(${index})">Delete</button>
+                        `;
+                        todoList.appendChild(todoItem);
+                    });
+                });
+        }
+
+        todoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = todoInput.value.trim();
+            const date = todoDate.value;
+            const color = todoColor.value;
+            if (text && date) {
+                fetch('/api/todos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text, date, color }),
+                })
+                .then(() => {
+                    todoInput.value = '';
+                    todoDate.value = today;
+                    loadTodos();
+                });
+            }
+        });
+
+        function deleteTodo(index) {
+            fetch(`/api/todos/${index}`, {
+                method: 'DELETE',
+            })
+            .then(() => loadTodos());
+        }
+
+        loadTodos();
+    </script>
+</body>
+</html>
