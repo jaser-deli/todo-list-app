@@ -39,4 +39,4 @@ def update_todo(index):
     return jsonify({'error': 'Todo not found'}), 404
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=53191)
+    app.run(host='0.0.0.0', port=59727, debug=True)

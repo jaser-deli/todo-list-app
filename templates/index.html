@@ -1,13 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" dir="ltr">
 <head>
     <title>Todo List</title>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Roboto:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #4CAF50;
+            --danger-color: #ff4444;
+            --text-color: #2c3e50;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            font-weight: 500;
+        }
+
+        [dir="rtl"] body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .title-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        [dir="rtl"] h1 {
+            font-family: 'Noto Sans Arabic', sans-serif;
+        }
+
+        .language-switcher {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            background-color: #f8f9fa;
+            border: 2px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .lang-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
         }
         .todo-item {
             display: flex;
@@ -31,20 +91,39 @@
         }
         .todo-text {
             flex: 1;
+            font-weight: 600;
+            font-size: 1.1em;
         }
         .todo-date {
             color: #666;
             font-size: 0.9em;
             min-width: 100px;
+            font-weight: 500;
+        }
+        
+        [dir="rtl"] .todo-item {
+            border-left: none;
+            border-right: 5px solid;
+        }
+        
+        [dir="rtl"] .todo-item:hover {
+            transform: translateX(-5px);
         }
         .delete-btn {
             background-color: #ff4444;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 8px 15px;
             border-radius: 4px;
             cursor: pointer;
             margin-left: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+        .delete-btn:hover {
+            background-color: #ff2020;
         }
         #todo-form {
             display: flex;
@@ -57,9 +136,12 @@
         }
         #todo-input {
             flex-grow: 1;
-            padding: 8px;
+            padding: 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            font-family: inherit;
+            font-size: 1em;
+            font-weight: 500;
         }
         #todo-date {
             padding: 8px;
@@ -79,10 +161,13 @@
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 12px 20px;
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: 0.95em;
         }
         button[type="submit"]:hover {
             background-color: #45a049;
@@ -90,7 +175,16 @@
     </style>
 </head>
 <body>
-    <h1>Todo List</h1>
+    <div class="header">
+        <div class="title-container">
+            <i class="fas fa-tasks fa-lg" style="color: var(--primary-color)"></i>
+            <h1 id="page-title">Todo List</h1>
+        </div>
+        <div class="language-switcher">
+            <button class="lang-btn active" onclick="setLanguage('en')">English</button>
+            <button class="lang-btn" onclick="setLanguage('ar')">عربي</button>
+        </div>
+    </div>
     <form id="todo-form">
         <input type="text" id="todo-input" placeholder="Enter a new todo" required>
         <input type="date" id="todo-date" required>
@@ -100,11 +194,52 @@
     <div id="todo-list"></div>
 
     <script>
+        const translations = {
+            en: {
+                title: 'Todo List',
+                placeholder: 'Enter a new todo',
+                addButton: 'Add Todo',
+                deleteButton: 'Delete'
+            },
+            ar: {
+                title: 'قائمة المهام',
+                placeholder: 'أدخل مهمة جديدة',
+                addButton: 'إضافة مهمة',
+                deleteButton: 'حذف'
+            }
+        };
+
         const todoForm = document.getElementById('todo-form');
         const todoInput = document.getElementById('todo-input');
         const todoDate = document.getElementById('todo-date');
         const todoColor = document.getElementById('todo-color');
         const todoList = document.getElementById('todo-list');
+        const pageTitle = document.getElementById('page-title');
+        const submitButton = todoForm.querySelector('button[type="submit"]');
+
+        function setLanguage(lang) {
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            
+            // Update text content
+            pageTitle.textContent = translations[lang].title;
+            todoInput.placeholder = translations[lang].placeholder;
+            submitButton.textContent = translations[lang].addButton;
+            
+            // Update language buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if ((lang === 'en' && btn.textContent === 'English') ||
+                    (lang === 'ar' && btn.textContent === 'عربي')) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Update delete buttons
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.textContent = translations[lang].deleteButton;
+            });
+        }
 
         // Set default date to today
         const today = new Date().toISOString().split('T')[0];
@@ -119,12 +254,13 @@
                         const todoItem = document.createElement('div');
                         todoItem.className = 'todo-item';
                         todoItem.style.borderLeftColor = todo.color || '#3498db';
+                        const currentLang = document.documentElement.lang || 'en';
                         todoItem.innerHTML = `
                             <div class="todo-content">
                                 <span class="todo-text">${todo.text}</span>
                                 <span class="todo-date">${todo.date}</span>
                             </div>
-                            <button class="delete-btn" onclick="deleteTodo(${index})">Delete</button>
+                            <button class="delete-btn" onclick="deleteTodo(${index})">${translations[currentLang].deleteButton}</button>
                         `;
                         todoList.appendChild(todoItem);
                     });
